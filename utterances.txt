@@ -24,6 +24,10 @@ ClearIntent blank screen
 ClearIntent blacken screen
 ClearIntent goodbye
 ClearIntent bye
+ShowFacesIntent show faces
+ShowFacesIntent show captured faces
+ShowFacesIntent show all faces
+ShowFacesIntent show the faces
 
 
 

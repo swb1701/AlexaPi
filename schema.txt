@@ -28,6 +28,9 @@
 	"intent": "PhotoIntent"
     },
     {
+	"intent": "ShowFacesIntent"
+    },
+    {
 	"intent": "ClearIntent"
     }
   ]
