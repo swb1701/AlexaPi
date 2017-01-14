@@ -3,6 +3,7 @@ import sys
 import os
 import json
 import time
+from subprocess import Popen, PIPE, STDOUT
 
 import secrets as s
 
@@ -12,10 +13,17 @@ uesess = boto3.Session(
         region_name=s.AWS_REGION
 )
 
+cmd=["/usr/bin/sudo","/usr/bin/python","screen.py"]
+p=Popen(cmd,stdout=PIPE,stdin=PIPE,stderr=PIPE)
+
 polly=uesess.client('polly')
 sqs=uesess.client('sqs')
 s3=uesess.client('s3')
 rekog=uesess.client('rekognition')
+
+def screen(cmd):
+    p.stdin.write(cmd+'\n')
+    p.stdin.flush()
 
 def speak(text):
     resp=polly.synthesize_speech(OutputFormat='mp3',Text=text,VoiceId='Salli')
@@ -103,9 +111,10 @@ def detect_faces(obj):
     print(resp)
 
 def clear_screen():
-    os.system("/usr/bin/sudo /usr/bin/killall -3 fbi;/usr/bin/sudo /usr/bin/fbi -T 2 -d /dev/fb1 -noverbose -a black.png")
+    screen("clear")
 
 speak("Welcome to the Alexa companion -- listening for commands")
+clear_screen()
 queue=s.SQS_QUEUE
 while True:
     resp=sqs.receive_message(QueueUrl=queue,WaitTimeSeconds=20)
