@@ -42,6 +42,10 @@ def make_collection(name):
     resp=rekog.create_collection(CollectionId=name)
     print(resp)
 
+def delete_collection(name):
+    resp=rekog.delete_collection(CollectionId=name)
+    print(resp)
+
 def index_face(name,obj):
     photoName=obj['S3Object']['Name']
     extName=":"+name+":"+(photoName.replace('/','_'))
@@ -87,12 +91,55 @@ def push_photo():
     print(filename)
     return({'S3Object':{'Bucket':s.BUCKET_NAME,'Name':filename}})
 
+def get_photo(key):
+    resp=s3.get_object(Bucket=s.BUCKET_NAME,Key=key)
+    f=open('snap.jpg','wb')
+    f.write(resp['Body'].read())
+    f.close()
+
+faceindex=[]    
+
 def list_faces():
+    global faceindex
     resp=rekog.list_faces(CollectionId='home',MaxResults=100)
     print(resp)
+    if 'Faces' in resp:
+        fcnt=1
+        faceindex=[]
+        for face in resp['Faces']:
+            extName=face['ExternalImageId']
+            faceindex.append(face['ImageId'])
+            extName=extName.replace('_','/')
+            print(extName)
+            if extName.startswith(':'):
+                cnt=2
+                i=0
+                while cnt>0:
+                    if extName[i]==':':
+                        cnt=cnt-1
+                    i=i+1
+                key=extName[i:]
+                parts=extName.split(':')
+                #print("Key:<"+key+">")
+                get_photo(key)
+                bb=face['BoundingBox']
+                iw=640
+                ih=480
+                fw=int(bb['Width']*iw)
+                fh=int(bb['Height']*ih)
+                fl=int(bb['Left']*iw)
+                ft=int(bb['Top']*ih)
+                show_subimage("snap.jpg",fl,ft,fw,fh,str(fcnt)+': '+parts[1])
+                time.sleep(2)
+            else:
+                print(str(fcnt)+': '+extName)
+            fcnt=fcnt+1
 
-def remove_face(faceid):
-    resp=rekog.delete_faces(CollectionId='home',FaceIds=[faceid])
+def remove_face(index):
+    print("Deleting ImageId:<"+faceindex[index-1]+">")
+    faces=[]
+    faces.append(faceindex[index-1])
+    resp=rekog.delete_faces(CollectionId='home',FaceIds=faces)
     print(resp)
     
 
@@ -117,8 +164,11 @@ def clear_screen():
 def show_image(filename):
     screen({"cmd":"image","file":filename})
     
-def show_subimage(filename,x,y,w,h):
-    screen({"cmd":"image","file":filename,"crop":{"x":x,"y":y,"w":w,"h":h}})
+def show_subimage(filename,x,y,w,h,label=None):
+    cmd={"cmd":"image","file":filename,"crop":{"x":x,"y":y,"w":w,"h":h}}
+    if label!=None:
+        cmd['label']=label
+    screen(cmd)
 
 speak("Welcome to the Alexa companion -- listening for commands")
 clear_screen()
@@ -145,6 +195,8 @@ while True:
                 detect_faces(obj)
             elif c=='make_collection':
                 make_collection(cmd['name'])
+            elif c=='delete_collection':
+                delete_collection(cmd['name'])
             elif c=='index_face':
                 snap()
                 obj=push_photo()
@@ -159,7 +211,7 @@ while True:
             elif c=='show_faces':
                 list_faces()
             elif c=='remove_face':
-               remove_face('8cbfb71a-816c-521a-96d1-1d1fa67f016c')
+               remove_face(cmd['index'])
                 
             sqs.delete_message(QueueUrl=queue,ReceiptHandle=msg['ReceiptHandle'])
                 
