@@ -1,0 +1,34 @@
+{
+  "intents": [
+    {
+      "intent": "SpeakIntent",
+      "slots": [
+        {
+          "name": "Phrase",
+          "type": "PHRASES"
+        }
+      ]
+    },
+    {
+      "intent": "IndexIntent",
+      "slots": [
+        {
+          "name": "Name",
+          "type": "NAME"
+        }
+      ]
+    },
+    {
+	"intent": "RecognizeIntent"
+    },
+    {
+	"intent": "FindFaceIntent"
+    },
+    {
+	"intent": "PhotoIntent"
+    },
+    {
+	"intent": "ClearIntent"
+    }
+  ]
+}

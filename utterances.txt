@@ -1,0 +1,30 @@
+SpeakIntent say {Phrase}
+SpeakIntent speak {Phrase}
+SpeakIntent repeat after me {Phrase}
+SpeakIntent repeat {Phrase}
+IndexIntent enroll {Name}
+IndexIntent index {Name}
+IndexIntent label {Name}
+IndexIntent capture {Name}
+IndexIntent my name is {Name}
+RecognizeIntent who am i
+RecognizeIntent who is this
+RecognizeIntent detect face
+RecognizeIntent who do you see
+FindFaceIntent show my face
+FindFaceIntent detect faces
+FindFaceIntent find my face
+FindFaceIntent zoom on my face
+PhotoIntent take a photo
+PhotoIntent take my picture
+PhotoIntent take my photo
+PhotoIntent take a snapshot
+ClearIntent clear screen
+ClearIntent blank screen
+ClearIntent blacken screen
+ClearIntent goodbye
+ClearIntent bye
+
+
+
+
