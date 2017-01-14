@@ -14,6 +14,7 @@ uesess = boto3.Session(
 )
 
 cmd=["/usr/bin/sudo","/usr/bin/python","screen.py"]
+
 p=Popen(cmd,stdout=PIPE,stdin=PIPE,stderr=PIPE)
 
 polly=uesess.client('polly')
@@ -22,7 +23,8 @@ s3=uesess.client('s3')
 rekog=uesess.client('rekognition')
 
 def screen(cmd):
-    p.stdin.write(cmd+'\n')
+    print("Screen:"+json.dumps(cmd))
+    p.stdin.write(json.dumps(cmd)+'\n')
     p.stdin.flush()
 
 def speak(text):
@@ -33,7 +35,8 @@ def speak(text):
     os.system("/usr/bin/mpg123 -q test.mp3")
 
 def snap():
-    os.system("/usr/bin/raspistill -t 1 -w 640 -h 480 -o snap.jpg;/usr/bin/sudo /usr/bin/killall -3 fbi;/usr/bin/sudo /usr/bin/fbi -T 2 -d /dev/fb1 -noverbose -a snap.jpg")
+    os.system("/usr/bin/raspistill -t 1 -w 640 -h 480 -o snap.jpg")
+    show_image("snap.jpg")
 
 def make_collection(name):
     resp=rekog.create_collection(CollectionId=name)
@@ -53,8 +56,7 @@ def index_face(name,obj):
             fh=int(bb['Height']*ih)
             fl=int(bb['Left']*iw)
             ft=int(bb['Top']*ih)
-            os.system("/usr/bin/convert snap.jpg -crop "+str(fw)+"x"+str(fh)+"+"+str(fl)+"+"+str(ft)+" face.jpg")
-            os.system("/usr/bin/sudo /usr/bin/killall -3 fbi;/usr/bin/sudo /usr/bin/fbi -T 2 -d /dev/fb1 -noverbose -a face.jpg")
+            show_subimage("snap.jpg",fl,ft,fw,fh)
     print(resp)
 
 def search_faces(obj):
@@ -106,12 +108,17 @@ def detect_faces(obj):
             fh=int(bb['Height']*ih)
             fl=int(bb['Left']*iw)
             ft=int(bb['Top']*ih)
-            os.system("/usr/bin/convert snap.jpg -crop "+str(fw)+"x"+str(fh)+"+"+str(fl)+"+"+str(ft)+" face.jpg")
-            os.system("/usr/bin/sudo /usr/bin/killall -3 fbi;/usr/bin/sudo /usr/bin/fbi -T 2 -d /dev/fb1 -noverbose -a face.jpg")
+            show_subimage("snap.jpg",fl,ft,fw,fh)
     print(resp)
 
 def clear_screen():
-    screen("clear")
+    screen({"cmd":"clear"})
+
+def show_image(filename):
+    screen({"cmd":"image","file":filename})
+    
+def show_subimage(filename,x,y,w,h):
+    screen({"cmd":"image","file":filename,"crop":{"x":x,"y":y,"w":w,"h":h}})
 
 speak("Welcome to the Alexa companion -- listening for commands")
 clear_screen()

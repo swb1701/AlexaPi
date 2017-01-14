@@ -1,2 +1,7 @@
 *.pyc
 secrets.py
+test.mp3
+face.jpg
+#*
+*~
+snap.jpg
