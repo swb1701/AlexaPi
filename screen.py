@@ -1,12 +1,19 @@
+#
+# Demonstration of Voice Interaction with a Raspberry Pi 3, Camera, and PiTFT Shield Doing Face Recognition
+# Scott Bennett, 1/17
+#
+
 import pygame
 import os
 import time
 import json
 import sys
 
+#set up some common colors
 blue=(0,0,255)
 black=(0,0,0)
 
+#set up our PiTFT 320x240
 os.putenv('SDL_FBDEV','/dev/fb1')
 pygame.init()
 screen=pygame.display.set_mode((320,240))
@@ -14,6 +21,7 @@ screen.fill(blue)
 pygame.display.update()
 pygame.mouse.set_visible(False)
 
+#clear the screen
 def clear_screen():
     screen.fill(black)
     pygame.display.update()
@@ -40,11 +48,16 @@ def aspect_scale(img,(bx,by)):
         else:
             sy = by
     return pygame.transform.scale(img,(int(sx),int(sy)))
-    
+
+#our command loop
 while True:
+    #read a line from the pipe
     line=sys.stdin.readline()
+    #parse the json
     map=json.loads(line)
+    #get the command
     cmd=map['cmd']
+    #handle the command
     if cmd=="clear":
         clear_screen()
     elif cmd=="fill":
