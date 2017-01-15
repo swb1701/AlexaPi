@@ -1,7 +1,7 @@
 *.pyc
 secrets.py
-test.mp3
-face.jpg
+*.mp3
+*.jpg
 #*
 *~
-snap.jpg
+
