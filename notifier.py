@@ -8,8 +8,12 @@ import sys
 import os
 import json
 import time
+import audio
 
 import secrets as s #import our keys and such
+
+if not audio.setup():
+    print("Sorry, you audio pairing doesn't appear to be working")
 
 #set up an AWS session
 uesess = boto3.Session(
