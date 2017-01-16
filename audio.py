@@ -20,8 +20,45 @@ def btctl(cmd):
     p.stdin.write(cmd+"\n")
     p.stdin.flush()
     time.sleep(4)
+    p.stdin.write("version\n")
+    p.stdin.flush()
+    lines=[]
+    done=False
+    while not done:
+        line=p.stdout.readline()
+        if line.startswith("Version"):
+            break;
+        else:
+            lines.append(line)
     p.stdin.write("quit\n")
     p.stdin.flush()
+    return(lines)
+
+def isConnected(device):
+    con=False
+    for line in btctl("info "+device):
+        if line.find("Connected: yes")>-1:
+            con=True
+            break
+    return(con)
+
+def ensureConnected(device):
+    if isConnected(device):
+        print("Echo is already connected -- we're good")
+        return(True)
+    else:
+        retry=5
+        while retry>0:
+            print("Attempting to connect to the Echo...")
+            btctl("connect "+device)
+            print("Waiting to see if the connection (if established) is stable...")
+            time.sleep(10)
+            if isConnected(device):
+                print("OK, we're still connected -- things must be OK")
+                return(True)
+            retry=retry-1
+            print("We're going to try to connect again...")
+        return(False)
 
 #
 # this assumes you've already paired but potentially pulse audio is not running or the device is not connected
@@ -31,6 +68,7 @@ def btctl(cmd):
 def setup():    
     try:
         p=Pulse()
+        ensureConnected(s.ECHO_BT_ADDRESS)
     except:
         print("Couldn't find pulseaudio running ... trying to fix that...")
         run("pulseaudio --start &")
@@ -42,7 +80,7 @@ def setup():
             print(sys.exc_info()[0])
             return(False)
         try:
-            btctl("connect "+s.ECHO_BT_ADDRESS)
+            ensureConnected(s.ECHO_BT_ADDRESS)
         except:
             print("Sorry, was unable to connect to Echo after starting pulseaudio...")
             print(sys.exc_info()[0])
