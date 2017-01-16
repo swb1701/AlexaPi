@@ -85,25 +85,32 @@ def setup():
             print("Sorry, was unable to connect to Echo after starting pulseaudio...")
             print(sys.exc_info()[0])
             return(False)
-        print("We've verified pulse is running")
-        cards=p.card_list()
-        found=False
-        for card in p.card_list():
-            if card.name.startswith("bluez_card"):
-                found=True
-                idx=card.index
-                print("Found a bluetooth audio source as card #"+str(idx))
-                run("pactl set-card-profile "+str(idx)+" a2dp")
-                print("I've ensured that the bluetooth card is using a2dp profile")
-                for sink in p.sink_list():
-                    if sink.description.startswith("Echo"):
-                        print("Found "+sink.description+" as sink #"+str(sink.index))
-                        run("pactl set-default-sink "+str(sink.index))
-                        print("I've set the Echo is the default sink")
-                        return(True)
-        if not found:
-            print("Sorry you probably need to connect to bluetooth on the Echo")
-            return(False)
+    print("We've verified pulse is running")
+    cards=p.card_list()
+    found=False
+    for card in p.card_list():
+        if card.name.startswith("bluez_card"):
+            found=True
+            idx=card.index
+            print("Found a bluetooth audio source as card #"+str(idx))
+            time.sleep(2)
+            run("pactl set-card-profile "+str(idx)+" a2dp")
+            print("I've ensured that the bluetooth card is using a2dp profile")
+            time.sleep(2)
+            foundSink=False
+            for sink in p.sink_list():
+                if sink.description.startswith("Echo"):
+                    foundSink=True
+                    print("Found "+sink.description+" as sink #"+str(sink.index))
+                    run("pactl set-default-sink "+str(sink.index))
+                    print("I've set the Echo is the default sink")
+                    return(True)
+            if not foundSink:
+                print("Despite having set the a2dp profile for #"+str(idx)+" we still can't find the Echo sink")
+                return(False)
+    if not found:
+        print("Sorry you probably need to connect to bluetooth on the Echo")
+        return(False)
     return(True)
 
 #print(setup())
